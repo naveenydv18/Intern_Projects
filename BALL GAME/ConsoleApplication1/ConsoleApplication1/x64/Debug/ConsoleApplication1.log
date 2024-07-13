@@ -1,0 +1,4 @@
+﻿  ConsoleApplication1.cpp
+C:\Users\naveen yadav\Desktop\BALL GAME\ConsoleApplication1\ConsoleApplication1\ConsoleApplication1.cpp(106,19): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  LINK : C:\Users\naveen yadav\Desktop\BALL GAME\ConsoleApplication1\x64\Debug\ConsoleApplication1.exe not found or not built by the last incremental link; performing full link
+  ConsoleApplication1.vcxproj -> C:\Users\naveen yadav\Desktop\BALL GAME\ConsoleApplication1\x64\Debug\ConsoleApplication1.exe

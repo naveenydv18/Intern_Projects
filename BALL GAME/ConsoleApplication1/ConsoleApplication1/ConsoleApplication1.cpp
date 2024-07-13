@@ -1,0 +1,307 @@
+ #include <iostream>
+#include <time.h>
+#include <conio.h>
+#include<Windows.h>
+using namespace std;
+enum eDir { STOP = 0, LEFT = 1, UPLEFT = 2, DOWNLEFT = 3, RIGHT = 4, UPRIGHT = 5, DOWNRIGHT = 6 };
+class cBall
+{
+private:
+    int x, y;//current co-ordinates of ball
+    int originalX, originalY;
+    eDir direction;
+public:
+    // cBall constructor
+    cBall(int posX, int posY)
+    {
+        originalX = posX;
+        originalY = posY;
+        x = posX; y = posY;
+        direction = STOP;
+    }
+    void Reset()
+    {
+        x = originalX; y = originalY;
+        direction = STOP;
+    }
+    void changeDirection(eDir d)
+    {
+        direction = d;
+    }
+    void randomDirection()
+    {
+        direction = (eDir)((rand() % 6) + 1);//choose any random direction from 1 to 6
+    }
+    inline int getX() { return x; }
+    inline int getY() { return y; }
+    inline eDir getDirection() { return direction; }
+    void Move()
+    {
+        switch (direction)
+        {
+        case STOP:
+            break;
+        case LEFT:
+            x--;
+            break;
+        case RIGHT:
+            x++;
+            break;
+        case UPLEFT:
+            x--; y--;
+            break;
+        case DOWNLEFT:
+            x--; y++;
+            break;
+        case UPRIGHT:
+            x++; y--;
+            break;
+        case DOWNRIGHT:
+            x++; y++;
+            break;
+        default:
+            break;
+        }
+    }
+    
+};
+class cPaddle
+{
+private:
+    int x, y;
+    int originalX, originalY;//paddle coordinates
+public:
+    cPaddle()
+    {
+        x = y = 0;
+    }
+    cPaddle(int posX, int posY) : cPaddle()
+    {
+        originalX = posX;
+        originalY = posY;
+        x = posX;
+        y = posY;
+    }
+    inline void Reset() { x = originalX; y = originalY; }
+    inline int getX() { return x; }
+    inline int getY() { return y; }
+    inline void moveUp() { y--; }
+    inline void moveDown() { y++; }
+    
+};
+class cGameManager
+{
+private:
+    int width, height;
+    int score1, score2;
+    char up1, down1, up2, down2;
+    bool quit;
+    cBall* ball;//dynamically allocated memory
+    cPaddle* player1;
+    cPaddle* player2;
+public:
+    //constructor of cgameManager class
+    cGameManager(int w, int h)
+    {
+        srand(time(NULL));
+        quit = false;
+        up1 = 'w'; up2 = 'i';
+        down1 = 's'; down2 = 'k';
+        score1 = score2 = 0;
+        width = w; height = h;
+        ball = new cBall(w / 2, h / 2);
+        player1 = new cPaddle(1, h / 2 - 3);//and x coordinate is 1 becuase of boundary start at width = 0 so, that is and  player 1's  start y - coordinate is h/2 - 3 , 3 is remaining no. of segments in player's paddle
+        player2 = new cPaddle(w - 2, h / 2 - 3);
+    }
+    ~cGameManager()//destructor of cGameManager class it deletes the dynamically allocated memory
+    {
+        delete ball, player1, player2;
+    }
+    void ScoreUp(cPaddle* player)
+    {
+        if (player == player1)
+            score1++;
+        else if (player == player2)
+            score2++;
+
+        ball->Reset();
+        player1->Reset();
+        player2->Reset();
+    }
+    void Draw()
+    {
+        //Drawing the game board on console
+        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), { 0,0 });//reduces flickering of screen
+        for (int i = 0; i < width + 2; i++)
+            //boundary is generated with this character whose hash value is 0xB2;
+            //these values are hash values 
+            cout << "\xB2";
+        cout << endl;
+
+        for (int i = 0; i < height; i++)
+        {
+            for (int j = 0; j < width; j++)
+            {
+                int ballx = ball->getX();
+                int bally = ball->getY();
+                int player1x = player1->getX();
+                int player2x = player2->getX();
+                int player1y = player1->getY();
+                int player2y = player2->getY();
+
+                if (j == 0)
+                    cout << "\xB2";
+
+                //draw 4 segments for each player paddle height of each paddle is 4 units 
+
+                if (ballx == j && bally == i)
+                    cout << "O"; //ball
+                else if (player1x == j && player1y == i)
+                    cout << "\xDB"; //player1
+                else if (player2x == j && player2y == i)
+                    cout << "\xDB"; //player2
+
+                else if (player1x == j && player1y + 1 == i)
+                    cout << "\xDB"; //player1
+                else if (player1x == j && player1y + 2 == i)
+                    cout << "\xDB"; //player1
+                else if (player1x == j && player1y + 3 == i)
+                    cout << "\xDB"; //player1
+
+                else if (player2x == j && player2y + 1 == i)
+                    cout << "\xDB"; //player1
+                else if (player2x == j && player2y + 2 == i)
+                    cout << "\xDB"; //player1
+                else if (player2x == j && player2y + 3 == i)
+                    cout << "\xDB"; //player1
+                else
+                    cout << " ";
+
+                if (j == width - 1)
+                    cout << "\xB2";
+            }
+            cout << endl;
+        }
+
+        for (int i = 0; i < width + 2; i++)
+            cout << "\xB2";
+        cout << endl;
+
+        cout << "Score 1: " << score1 << endl << "Score 2: " << score2 << endl;
+    }
+    void Input()
+    {
+        ball->Move(); 
+
+        //get the coordinates of ball and paddles
+
+        int ballx = ball->getX();
+        int bally = ball->getY();
+        int player1x = player1->getX();
+        int player2x = player2->getX();
+        int player1y = player1->getY();
+        int player2y = player2->getY();
+
+        if (_kbhit())
+        {
+            //if you press a key on keyboard then _kbhit gives non-zero value
+            char current = _getch();//this will tell which character has been pressed
+            if (current == up1)
+                if (player1y > 0)
+                    player1->moveUp();
+            if (current == up2)
+                if (player2y > 0)
+                    player2->moveUp();
+            if (current == down1)
+                if (player1y + 4 < height)
+                    player1->moveDown();
+            if (current == down2)
+                if (player2y + 4 < height)
+                    player2->moveDown();
+
+            if (ball->getDirection() == STOP)
+                ball->randomDirection();
+
+            if (current == 'q')
+                quit = true;
+        }
+    }
+    void Logic()
+    {
+        int ballx = ball->getX();
+        int bally = ball->getY();
+        int player1x = player1->getX();
+        int player2x = player2->getX();
+        int player1y = player1->getY();
+        int player2y = player2->getY();
+
+        //collision conditions 
+        
+        //left paddle
+        for (int i = 0; i < 4; i++)
+            if (ballx == player1x + 1)
+                if (bally == player1y + i)
+                    ball->changeDirection((eDir)((rand() % 3) + 4));//ball changes its direction randomly after collision
+
+        //right paddle
+        for (int i = 0; i < 4; i++)
+            if (ballx == player2x - 1)
+                if (bally == player2y + i)
+                    ball->changeDirection((eDir)((rand() % 3) + 1));
+
+        //bottom wall
+        if (bally == height - 1)
+            ball->changeDirection(ball->getDirection() == DOWNRIGHT ? UPRIGHT : UPLEFT);
+        //top wall
+        if (bally == 0)
+            ball->changeDirection(ball->getDirection() == UPRIGHT ? DOWNRIGHT : DOWNLEFT);
+        //right wall
+        if (ballx == width - 1)
+            ScoreUp(player1);
+        //left wall
+        if (ballx == 0)
+            ScoreUp(player2);
+    }
+    void Run()
+    {
+        bool startGame = false;
+        cout << "Press SpaceBar to Start the game :";
+
+        while (!startGame) {
+            if (_kbhit()) {
+                char ch = _getch();
+                if (ch == ' ') {
+                    startGame = true;
+                }
+            }
+            Sleep(50); // Sleep to avoid excessive CPU usage,control the speed of game
+        }
+
+        while (!quit)
+        {
+            Draw();
+            Input();
+            Logic();
+            Sleep(50);
+        }
+
+        if (score1 > score2) {
+            cout << "Player 1 is Winner\n";
+        }
+        else if (score1 < score2) {
+            cout << "Player 2 is Winner\n";
+        }
+        else {
+            cout << "Draw\n";
+        }
+    }
+
+};
+int main()
+{
+    cGameManager c(40, 20); //c  is an object of class cGameManager , setup the initial game config.
+    c.Run();
+    return 0;
+}
+
+
